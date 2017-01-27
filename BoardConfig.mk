@@ -85,4 +85,4 @@ TW_HAS_DOWNLOAD_MODE := true
 TW_INCLUDE_CRYPTO := true
 TW_INPUT_BLACKLIST := "hbtp_vm"
 TW_NO_REBOOT_BOOTLOADER := true
-TW_THEME := landscape_hdpi
+TW_THEME := portrait_hdpi
