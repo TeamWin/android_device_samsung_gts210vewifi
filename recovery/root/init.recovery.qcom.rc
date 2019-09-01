@@ -1,11 +1,32 @@
 on init
-    wait /dev/ion
-    wait /dev/qseecom
-
-    chown system system /dev/ion
+    chmod 0660 /dev/qseecom
     chown system drmrpc /dev/qseecom
+    chmod 0664 /dev/ion
+    chown system system /dev/ion
 
-    start qseecomd
+on fs
+    wait /dev/block/platform/soc.0/${ro.boot.bootdevice}
+    symlink /dev/block/platform/soc.0/${ro.boot.bootdevice} /dev/block/bootdevice
 
-service qseecomd /sbin/qseecomd
+on property:ro.crypto.state=encrypted
+    start sbinqseecomd
+    
+# separate copy needed to use /sbin/linker64 instead of /system/bin/linker64
+service sbinqseecomd /sbin/qseecomd
+    oneshot
     disabled
+    user root
+    group root
+    seclabel u:r:recovery:s0
+
+service keymaster-3-0 /sbin/android.hardware.keymaster@3.0-service
+    user root
+    group root
+    disabled
+    seclabel u:r:recovery:s0
+
+on property:ro.crypto.state=encrypted
+    start sbinqseecomd
+
+on property:sys.listeners.registered=true
+    start keymaster-3-0

@@ -1,0 +1,2 @@
+add_lunch_combo omni_gts210vewifi-userdebug
+add_lunch_combo omni_gts210vewifi-eng
