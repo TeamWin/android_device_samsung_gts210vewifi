@@ -1,0 +1,41 @@
+# Init config for fixtime
+
+service fixtime /sbin/sh /sbin/fixtime.sh
+    oneshot
+    disabled
+#    user root
+#    group root
+    seclabel u:r:recovery:s0
+
+# timekeep is used by CM/AOSP based ROMs
+service timekeep /sbin/timekeep restore
+    oneshot
+    disabled
+#    user root
+#    group root
+    seclabel u:r:recovery:s0
+
+# time_daemon is used by STOCK bases ROMs with propierty Qualcomm binary
+service time_daemon /sbin/time_daemon
+    oneshot
+    disabled
+#    user root
+#    group root
+    seclabel u:r:recovery:s0
+
+# Start fixtime after /data is available
+on boot
+    start fixtime
+
+# Update time to value from ROMs using timekeep (after time property was written)
+on property:twrp.fixtime.use_timekeep=1
+    start timekeep
+
+# Update time to value from ROMs using Qualcomm time_daemon (after we detect qcom time file)
+on property:twrp.fixtime.use_timedaemon=1
+    start time_daemon
+
+# Force reload persist props, because fixtime need it (for example when /data is encrypt)
+on property:twrp.fixtime.load_persist_props=true
+    load_persist_props
+    setprop twrp.fixtime.load_persist_props false # In case we want to restart fixtime

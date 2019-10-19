@@ -14,13 +14,21 @@
 # limitations under the License.
 #
 
-# Sample: This is where we'd set a backup provider if we had one
-# $(call inherit-product, device/sample/products/backup_overlay.mk)
+$(call inherit-product, build/target/product/embedded.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/full_base.mk)
+$(call inherit-product, frameworks/native/build/tablet-10in-xhdpi-2048-dalvik-heap.mk)
 
-# Inherit from the common Open Source product configuration
-$(call inherit-product, $(SRC_TARGET_DIR)/product/aosp_base_telephony.mk)
+# Inherit from our custom product configuration
+$(call inherit-product, vendor/omni/config/common_tablet.mk)
 
-PRODUCT_NAME := omni_gts210vewifi
-PRODUCT_DEVICE := gts210vewifi
-PRODUCT_BRAND := Samsung
-PRODUCT_MANUFACTURER := Samsung
+PRODUCT_PACKAGES += \
+	charger_res_images \
+	charger \
+	timekeep
+
+PRODUCT_NAME            := omni_gts210vewifi
+PRODUCT_DEVICE          := gts210vewifi
+PRODUCT_BRAND           := samsung
+PRODUCT_MANUFACTURER    := samsung
+PRODUCT_MODEL           := SM-T813

@@ -1,0 +1,22 @@
+# Partition		format	    device										    option
+/system         ext4        /dev/block/bootdevice/by-name/system            flags=display="System";wipeingui;backup=1
+/system_image	emmc        /dev/block/bootdevice/by-name/system            flags=backup=1
+/data           ext4        /dev/block/bootdevice/by-name/userdata          flags=display="Data";encryptable=footer;length=-16384
+/cache          ext4        /dev/block/bootdevice/by-name/cache             flags=wipeingui;backup=1;
+/boot           emmc        /dev/block/bootdevice/by-name/boot              flags=backup=1
+/recovery       emmc        /dev/block/bootdevice/by-name/recovery          flags=backup=1
+/misc           emmc        /dev/block/bootdevice/by-name/fota              flags=backup=1
+
+/firmware       vfat        /dev/block/bootdevice/by-name/apnhlos           flags=display="Firmware";backup=1;mounttodecrypt
+/firmware-modem emmc        /dev/block/bootdevice/by-name/modem             flags=display="Modem";backup=1;flashimg=1;mounttodecrypt
+/dsp            vfat        /dev/block/bootdevice/by-name/dsp               flags=display="dsp"
+/frp            emmc        /dev/block/bootdevice/by-name/config            flags=display="frp";backup=1
+/persist        ext4        /dev/block/bootdevice/by-name/persist           flags=display="Persist";backup=1
+/splash			emmc        /dev/block/bootdevice/by-name/splash            flags=display="Splash";backup=1;flashimg=1
+/efs1           ext4        /dev/block/bootdevice/by-name/efs               flags=display="EFS";backup=1
+/efs2		    emmc        /dev/block/bootdevice/by-name/modemst1          flags=subpartitionof=/efs1;backup=1
+/efs3		    emmc        /dev/block/bootdevice/by-name/modemst2          flags=subpartitionof=/efs1;backup=1
+/persdata		ext4        /dev/block/bootdevice/by-name/persdata          flags=backup=1
+
+/sdcard1        auto        /dev/block/mmcblk1p1    /dev/block/mmcblk1      flags=display="MicroSD";storage;wipeingui;removable;encryptable=footer;length=-16384 
+/usb-otg        auto        /dev/block/sda1         /dev/block/sda          flags=display="USB-OTG";storage;wipeingui;removable

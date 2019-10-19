@@ -1,0 +1,75 @@
+From 0116632e2a708c966403a97c379cc63df3aa2ae0 Mon Sep 17 00:00:00 2001
+From: Captain Throwback <captainthrowback@hotmail.com>
+Date: Thu, 04 Jul 2019 14:26:39 -0400
+Subject: [PATCH] openrecoveryscript: do not skip decryption even if using block.map
+
+- Allows addon.d scripts to run that require access
+  to decrypted /data (e.g. Magisk). Seems to also affect
+  GApps addon.d script, resulting in non-booting system
+- If decryption prompt is canceled, installation will
+  still proceed (i.e. on devices where TWRP doesn't
+  support encryption)
+- Should resolve
+  https://github.com/TeamWin/Team-Win-Recovery-Project/issues/1478
+  and possibly
+  https://github.com/TeamWin/Team-Win-Recovery-Project/issues/1459
+
+Change-Id: Idcd397aa145577c409d5174ae3f9c48474e5734b
+---
+
+diff --git a/twrp.cpp b/twrp.cpp
+index 95e376b..dac0093 100755
+--- a/twrp.cpp
++++ b/twrp.cpp
+@@ -127,7 +127,6 @@
+ 	gui_loadResources();
+ 
+ 	bool Shutdown = false;
+-	bool SkipDecryption = false;
+ 	string Send_Intent = "";
+ 	{
+ 		TWPartition* misc = PartitionManager.Find_Partition_By_Path("/misc");
+@@ -162,9 +161,6 @@
+ 					string ORSCommand = "install ";
+ 					ORSCommand.append(ptr);
+ 
+-					// If we have a map of blocks we don't need to mount data.
+-					SkipDecryption = *ptr == '@';
+-
+ 					if (!OpenRecoveryScript::Insert_ORS_Command(ORSCommand))
+ 						break;
+ 				} else
+@@ -232,17 +228,13 @@
+ 
+ 	// Offer to decrypt if the device is encrypted
+ 	if (DataManager::GetIntValue(TW_IS_ENCRYPTED) != 0) {
+-		if (SkipDecryption) {
+-			LOGINFO("Skipping decryption\n");
++		LOGINFO("Is encrypted, do decrypt page first\n");
++		if (gui_startPage("decrypt", 1, 1) != 0) {
++			LOGERR("Failed to start decrypt GUI page.\n");
+ 		} else {
+-			LOGINFO("Is encrypted, do decrypt page first\n");
+-			if (gui_startPage("decrypt", 1, 1) != 0) {
+-				LOGERR("Failed to start decrypt GUI page.\n");
+-			} else {
+-				// Check for and load custom theme if present
+-				TWFunc::check_selinux_support();
+-				gui_loadCustomResources();
+-			}
++			// Check for and load custom theme if present
++			TWFunc::check_selinux_support();
++			gui_loadCustomResources();
+ 		}
+ 	} else if (datamedia) {
+ 		TWFunc::check_selinux_support();
+@@ -266,7 +258,8 @@
+ 	// Run any outstanding OpenRecoveryScript
+ 	std::string cacheDir = TWFunc::get_cache_dir();
+ 	std::string orsFile = cacheDir + "/recovery/openrecoveryscript";
+-	if ((DataManager::GetIntValue(TW_IS_ENCRYPTED) == 0 || SkipDecryption) && (TWFunc::Path_Exists(SCRIPT_FILE_TMP) || TWFunc::Path_Exists(orsFile))) {
++
++	if (TWFunc::Path_Exists(SCRIPT_FILE_TMP) || (DataManager::GetIntValue(TW_IS_ENCRYPTED) == 0 && TWFunc::Path_Exists(orsFile))) {
+ 		OpenRecoveryScript::Run_OpenRecoveryScript();
+ 	}
+ 
